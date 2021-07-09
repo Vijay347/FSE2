@@ -1,26 +1,30 @@
-
 <mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark indigo" [containerInside]="false">
 
   <mdb-navbar-brand>
-    <a class="navbar-brand" href="#">
-        <img src="../assets/e-rlogo.png" height="30" class="d-inline-block align-top" alt="">
-        E-Stock Market
+    <a class="navbar-brand" routerLink="home" href="javascript:void(0)">
+      <img src="../assets/e-rlogo.png" height="30" class="d-inline-block align-top" alt="">
+      E-Stock Market
     </a>
-</mdb-navbar-brand>
+  </mdb-navbar-brand>
 
   <links>
 
     <ul class="navbar-nav ml-auto">
       <li class="nav-item active">
-        <a class="nav-link waves-light" mdbWavesEffect><mdb-icon fas icon="sign-in-alt"></mdb-icon> Sign In<span class="sr-only">(current)</span></a>
+        <a class="nav-link waves-light" routerLink="signin" mdbWavesEffect>
+          <mdb-icon fas icon="sign-in-alt"></mdb-icon> Sign In<span class="sr-only">(current)</span>
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link waves-light" mdbWavesEffect><mdb-icon fas icon="user-plus"></mdb-icon> Sign Up</a>
+        <a class="nav-link waves-light"  routerLink="signup" mdbWavesEffect>
+          <mdb-icon fas icon="user-plus"></mdb-icon> Sign Up
+        </a>
       </li>
 
       <li class="nav-item dropdown" dropdown>
         <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
-          <mdb-icon fas icon="user-circle"></mdb-icon> Profile<span class="caret"></span></a>
+          <mdb-icon fas icon="user-circle"></mdb-icon> Profile<span class="caret"></span>
+        </a>
         <div *dropdownMenu class="dropdown-menu dropdown-menu-right dropdown dropdown-primary" role="menu">
           <a class="dropdown-item waves-light" mdbWavesEffect href="#">My account</a>
           <a class="dropdown-item waves-light" mdbWavesEffect href="#">Log out</a>
@@ -28,7 +32,10 @@
       </li>
 
     </ul>
-  
+
   </links>
 
 </mdb-navbar>
+<div style="overflow: auto;height: 98vh;">
+  <router-outlet></router-outlet>
+</div>
