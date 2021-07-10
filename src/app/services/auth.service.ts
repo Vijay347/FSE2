@@ -2,24 +2,14 @@ import { Injectable } from '@angular/core';
 import { Auth } from 'aws-amplify';
 import { Router } from '@angular/router';
 import { SignIn, SignUp } from '../models/user.model';
-import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private userBehaviourSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
-  public userSubject$ = this.userBehaviourSubject.asObservable();
-
   constructor(private router: Router) {
-    // if (this.userBehaviourSubject.value == undefined || this.userBehaviourSubject.value == null) {
-    //   if (sessionStorage.getItem('currentUser')) {
-    //     this.userBehaviourSubject.next(JSON.parse(sessionStorage.getItem('currentUser')));
-    //   }
-    //   else
-    //     this.userBehaviourSubject.next(null);
-    // }
+
   }
 
   async loginWithCognito(userDet: SignIn): Promise<boolean> {
@@ -27,7 +17,6 @@ export class AuthService {
       let user = await Auth.signIn(userDet.email, userDet.password);
       let tokens = user.signInUserSession;
       if (tokens != null) {
-        console.log('User authenticated');
         return true;
       }
       return false;
@@ -52,6 +41,16 @@ export class AuthService {
       return true;
     } catch (error) {
       console.log('error signing up:', error);
+      return false;
+    }
+  }
+
+  async signOut(): Promise<boolean> {
+    try {
+      await Auth.signOut();
+      return true;
+    } catch (error) {
+      console.log('error signing out: ', error);
       return false;
     }
   }

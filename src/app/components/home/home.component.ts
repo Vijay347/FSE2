@@ -11,13 +11,6 @@ export class HomeComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    Auth.currentUserInfo().then((x:any) => {
-      console.log(x);
-    });
-
-    Auth.currentSession().then((x:any) => {
-      console.log(x);
-    });
 
   }
 

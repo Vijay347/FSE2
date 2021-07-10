@@ -12,16 +12,10 @@ import { SigninComponent } from './components/auth/signin/signin.component';
 import { SignupComponent } from './components/auth/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
 import { UnAuthorizedComponent } from './components/un-authorized/un-authorized.component';
+import { environment } from 'src/environments/environment';
 
 Amplify.configure({
-  Auth:{
-    mandatorySignIn:true,
-    region: 'us-east-2',
-    userPoolId: 'us-east-2_ClDUuWRcR',
-    userPoolWebClientId: 'rlbbg9f94vodaj73dpekde4pt',
-    authenticationFlowType:'USER_PASSWORD_AUTH'
-  }
-
+  Auth: environment.awsCognitoSettings
 });
 
 

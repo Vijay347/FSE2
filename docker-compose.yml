@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+
+  client:
+    hostname: localhost
+    container_name: estockmarket
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '4000:80'
+    environment:
+      - NG_ENV=production
