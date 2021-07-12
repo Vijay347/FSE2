@@ -16,14 +16,14 @@ RUN npm run build -- --configuration=$NG_ENV
 
 #### 2. Deploy our Angular app to NGINX ###
 # nginx state for serving content
-FROM nginx:1.13.12-alpine
+FROM nginx:1.16.0-alpine
 # Copy our default nginx config
-COPY ./.docker/default.conf /etc/nginx/conf.d/
+COPY ./.docker/nginx.conf /etc/nginx/nginx.conf
 # Remove default nginx static assets
 RUN rm -rf /usr/share/nginx/html/*
 # Copy static assets from builder stage
 COPY --from=builder /app-ui/dist/estockmarketui /usr/share/nginx/html
-# Expose in 80 port
-EXPOSE 80 443
+# Expose in 9191 port
+EXPOSE 9191
 # Containers run nginx with global directives and daemon off
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

@@ -11,6 +11,8 @@ import { AuthService } from './services/auth.service';
 })
 export class AppComponent implements OnInit {
   public loggerUser: any = null;
+  public isUserLoggedIn: boolean = false;
+
   constructor(private authService: AuthService, private router: Router) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationStart)
@@ -18,13 +20,14 @@ export class AppComponent implements OnInit {
       Auth.currentUserInfo().then((x: any) => {
         this.loggerUser = x;
       });
-      Auth.currentSession().then((x: any) => {
-      console.log(x);
-      });
+      Auth.currentAuthenticatedUser().then((x: any) => {
+        this.isUserLoggedIn = true;
+      }).catch(err => { this.isUserLoggedIn = false; });
     });
   }
-  ngOnInit(): void {
 
+  ngOnInit() {
+ 
   }
 
   signout(event: Event) {
@@ -36,5 +39,4 @@ export class AppComponent implements OnInit {
       }
     });
   }
-
 }

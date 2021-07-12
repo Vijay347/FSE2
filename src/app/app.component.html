@@ -8,9 +8,20 @@
   </mdb-navbar-brand>
 
   <links>
+    <ul class="navbar-nav mr-auto" *ngIf="isUserLoggedIn">
+      <li class="nav-item active">
+        <a class="nav-link waves-light" mdbWavesEffect><mdb-icon fas icon="home"></mdb-icon> Home<span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link waves-light" routerLink="add-company" mdbWavesEffect><mdb-icon fas icon="plus-circle"></mdb-icon> Add Company</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link waves-light" mdbWavesEffect><mdb-icon fas icon="clipboard-list"></mdb-icon> List All Companies</a>
+      </li>
+    </ul>
 
     <ul class="navbar-nav ml-auto">
-      <ng-container *ngIf="loggerUser == null">
+      <ng-container *ngIf="!isUserLoggedIn">
         <li class="nav-item active">
           <a class="nav-link waves-light" routerLink="signin" mdbWavesEffect>
             <mdb-icon fas icon="sign-in-alt"></mdb-icon> Sign In<span class="sr-only">(current)</span>
@@ -22,10 +33,10 @@
           </a>
         </li>
       </ng-container>
-      <ng-container *ngIf="loggerUser != null">
-        <li class="nav-item">
+      <ng-container *ngIf="isUserLoggedIn">
+        <li class="nav-item" *ngIf="loggerUser != null">
           <a class="nav-link waves-light" style="font-weight: bold;">
-           Welcome, {{loggerUser.attributes.given_name}} {{loggerUser.attributes.family_name}}
+            Welcome, {{loggerUser.attributes.given_name}} {{loggerUser.attributes.family_name}}
           </a>
         </li>
         <li class="nav-item dropdown" dropdown>
@@ -34,7 +45,8 @@
           </a>
           <div *dropdownMenu class="dropdown-menu dropdown-menu-right dropdown dropdown-primary" role="menu">
             <a class="dropdown-item waves-light" mdbWavesEffect href="#">My account</a>
-            <a class="dropdown-item waves-light" (click)="signout($event)" mdbWavesEffect href="javascript:void(0)">Log out</a>
+            <a class="dropdown-item waves-light" (click)="signout($event)" mdbWavesEffect href="javascript:void(0)">Log
+              out</a>
           </div>
         </li>
       </ng-container>

@@ -1,0 +1,69 @@
+<mdb-card class="cardAdd">
+    <mdb-card-body>
+        <mdb-card-title>
+            <h4 class="text-center">Add Company</h4>
+        </mdb-card-title>
+        <form [formGroup]="addCompanyForm" novalidate autocomplete="off" class="well form-horizontal">
+            <fieldset>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="companyCode"><small class="requiredField">*</small>Code</label>
+                            <input type="text" formControlBame="companyCode" class="form-control" id="companyCode"
+                                placeholder="Company Code">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="companyName"><small class="requiredField">*</small>Company Name</label>
+                            <input type="text" formControlBame="companyName" class="form-control" id="companyName"
+                                placeholder="Company Name">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="companyCEO"><small class="requiredField">*</small>Company CEO</label>
+                            <input type="text" formControlBame="companyCEO" class="form-control" id="companyCEO"
+                                placeholder="Company CEO">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="companyTurnover"><small class="requiredField">*</small>Company Turnover</label>
+                            <input type="number" formControlBame="companyTurnover" class="form-control"
+                                id="companyTurnover" placeholder="Company Turnover">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="companyWebsite"><small class="requiredField">*</small>Company Website</label>
+                            <input type="text" formControlBame="companyWebsite" class="form-control" id="companyWebsite"
+                                placeholder="Company Website">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="companyStockExchange"><small class="requiredField">*</small>Company Stock
+                                Exchange</label>
+                            <select class="form-control" formControlName="companyStockExchange"
+                                id="companyStockExchange">
+                                <option value="null">--Select--</option>
+                                <option *ngFor="let exchange of stockExchangeList" [value]="exchange">
+                                    {{exchange}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 pull-right">
+                        <button mdbBtn type="button" color="default" class="waves-light" mdbWavesEffect>Submit</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </mdb-card-body>
+</mdb-card>
