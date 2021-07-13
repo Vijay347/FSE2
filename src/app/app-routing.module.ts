@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AddCompanyComponent } from './components/add-company/add-company.component';
 import { SigninComponent } from './components/auth/signin/signin.component';
 import { SignupComponent } from './components/auth/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
@@ -23,10 +22,6 @@ const routes: Routes = [
     path: 'signup',
     component: SignupComponent,
     canActivate: [AuthActivateGuardService]
-  },
-  {
-    path: 'add-company',
-    component: AddCompanyComponent
   },
   {
     path: 'list-companies',

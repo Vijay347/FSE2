@@ -14,7 +14,6 @@ import { HomeComponent } from './components/home/home.component';
 import { UnAuthorizedComponent } from './components/un-authorized/un-authorized.component';
 import { environment } from 'src/environments/environment';
 import { AuthActivateGuardService } from './guards/auth-activate-guard.service';
-import { AddCompanyComponent } from './components/add-company/add-company.component';
 import { ListCompaniesComponent } from './components/list-companies/list-companies.component';
 
 Amplify.configure({
@@ -29,7 +28,6 @@ Amplify.configure({
     SignupComponent,
     HomeComponent,
     UnAuthorizedComponent,
-    AddCompanyComponent,
     ListCompaniesComponent
   ],
   imports: [

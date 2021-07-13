@@ -9,11 +9,8 @@
 
   <links>
     <ul class="navbar-nav mr-auto" *ngIf="isUserLoggedIn">
-      <li class="nav-item active">
-        <a class="nav-link waves-light" mdbWavesEffect><mdb-icon fas icon="home"></mdb-icon> Home<span class="sr-only">(current)</span></a>
-      </li>
       <li class="nav-item">
-        <a class="nav-link waves-light" routerLink="add-company" mdbWavesEffect><mdb-icon fas icon="plus-circle"></mdb-icon> Add Company</a>
+        <a class="nav-link waves-light" routerLink="home" mdbWavesEffect><mdb-icon fas icon="home"></mdb-icon> Home<span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link waves-light" routerLink="list-companies" mdbWavesEffect><mdb-icon fas icon="clipboard-list"></mdb-icon> List All Companies</a>
@@ -22,7 +19,7 @@
 
     <ul class="navbar-nav ml-auto">
       <ng-container *ngIf="!isUserLoggedIn">
-        <li class="nav-item active">
+        <li class="nav-item">
           <a class="nav-link waves-light" routerLink="signin" mdbWavesEffect>
             <mdb-icon fas icon="sign-in-alt"></mdb-icon> Sign In<span class="sr-only">(current)</span>
           </a>
