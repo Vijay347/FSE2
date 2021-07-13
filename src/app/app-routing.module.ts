@@ -4,6 +4,7 @@ import { AddCompanyComponent } from './components/add-company/add-company.compon
 import { SigninComponent } from './components/auth/signin/signin.component';
 import { SignupComponent } from './components/auth/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
+import { ListCompaniesComponent } from './components/list-companies/list-companies.component';
 import { UnAuthorizedComponent } from './components/un-authorized/un-authorized.component';
 import { AuthActivateGuardService } from './guards/auth-activate-guard.service';
 
@@ -26,6 +27,10 @@ const routes: Routes = [
   {
     path: 'add-company',
     component: AddCompanyComponent
+  },
+  {
+    path: 'list-companies',
+    component: ListCompaniesComponent
   },
   {
     path: 'un-authorized',

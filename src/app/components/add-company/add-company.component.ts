@@ -9,7 +9,9 @@ import { FormalidationService } from 'src/app/services/validators.service';
 })
 export class AddCompanyComponent implements OnInit {
 
-  addCompanyForm: FormGroup;
+  public submitted: boolean = false;
+
+  public addCompanyForm: FormGroup;
 
   stockExchangeList: string[] = ['BSE', 'NSE'];
 
@@ -18,13 +20,24 @@ export class AddCompanyComponent implements OnInit {
 
   ngOnInit(): void {
     this.addCompanyForm = this.fb.group({
-      companyCode: new FormControl('', Validators.required),
-      companyName: new FormControl('', Validators.required),
-      companyCEO: new FormControl('', Validators.required),
-      companyTurnover: new FormControl(0, Validators.compose([Validators.required, this.formValidatorService.companyTurnoverValidator])),
-      companyWebsite: new FormControl('', Validators.required),
+      companyCode: new FormControl(null, Validators.required),
+      companyName: new FormControl(null, Validators.required),
+      companyCEO: new FormControl(null, Validators.required),
+      companyTurnover: new FormControl(null, { validators: Validators.compose([Validators.required, this.formValidatorService.companyTurnoverValidator()]) }),
+      companyWebsite: new FormControl(null, Validators.required),
       companyStockExchange: new FormControl(null, Validators.required)
     });
+  }
+
+  get addCompanyFormControl() {
+    return this.addCompanyForm.controls;
+  }
+
+  onSubmit() {
+    this.submitted = true;
+    if (this.addCompanyForm.valid) {
+      console.table(this.addCompanyForm.value);
+    }
   }
 
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ValidatorFn, AbstractControl } from '@angular/forms';
+import { ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { FormGroup } from '@angular/forms';
 
 @Injectable({
@@ -56,13 +56,19 @@ export class FormalidationService {
         return (UserList.indexOf(userName) > -1);
     }
 
-    companyTurnoverValidator(control: AbstractControl): ValidatorFn {
-        return (control: AbstractControl): { [key: string]: any } => {
-            if (!control.value) {
-                return null;
+    companyTurnoverValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            const v = +control.value;
+
+            if (isNaN(v)) {
+                return { 'gte': true, 'requiredValue': 1 }
             }
-            const valid = control?.value > 100000000;
-            return valid ? null : { invalidTurnover: true };
+
+            if (v <= 100000000) {
+                return { 'gte': true, 'requiredValue': 1 }
+            }
+
+            return null;
         };
     }
 } 
