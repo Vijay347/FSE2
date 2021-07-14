@@ -5,21 +5,26 @@
             <div class="card-body" style="padding: 0.5rem;">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="md-form">
                                 <input type="text" [(ngModel)]="searchText" (ngModelChange)="searchItems()"
                                     class="form-control" id="search" mdbInput />
                                 <label for="search">Search Company</label>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <button type="button" (click)="addCompany.show()" mdbBtn color="primary" size="sm"
-                                class="my-0" style="float: right;margin-top: 1.5rem !important;">
+                        <div class="col-md-8">
+                            <button type="button" (click)="add()" mdbBtn color="primary" size="sm" class="my-0"
+                                style="float: right;margin-top: 1.5rem !important;">
                                 <mdb-icon fas icon="plus-circle"></mdb-icon> Add Company
+                            </button>
+                            <button *ngIf="companyList != null && companyList.length > 0" type="button"
+                                (click)="viewStockDetails()" mdbBtn color="primary" size="sm" class="my-0"
+                                style="float: right;margin-top: 1.5rem !important;">
+                                <mdb-icon fas icon="plus-circle"></mdb-icon> View Stock Details
                             </button>
                         </div>
                     </div>
-                    <table id="listTable" mdbTable #tableEl="mdbTable" dbTableScroll scrollY="true" maxHeight="100"
+                    <table id="listTable" mdbTable #tableEl="mdbTable" mdbTableScroll [scrollY]="scrollY" maxHeight="300"
                         class="z-depth-1">
                         <thead>
                             <tr>
@@ -47,7 +52,8 @@
                                     [mdbTableSort]="companyList" [sortBy]="'stockExchange'" scope="col"
                                     style="color: #ffffff;">Stock Exchange <mdb-icon fas icon="sort"></mdb-icon>
                                 </th>
-                                <th class="font-weight-bold stylish-color" style="color: #ffffff;">View</th>
+                                <th class="font-weight-bold stylish-color" style="color: #ffffff;">Add</th>
+                                <!-- <th class="font-weight-bold stylish-color" style="color: #ffffff;">View</th> -->
                                 <th class="font-weight-bold stylish-color" style="color: #ffffff;">Delete</th>
                             </tr>
                         </thead>
@@ -64,7 +70,7 @@
                                     {{el.ceo}}</td>
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
-                                    {{el.turnover}}</td>
+                                    $ {{el.turnover}}</td>
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
                                     <a href="{{el.website}}" target="_blank">{{el.website}}</a></td>
@@ -74,8 +80,8 @@
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
                                     <button type="button" mdbBtn color="primary" size="sm" class="my-0"
-                                        (click)="viewStockDetails(el.id)">
-                                        <mdb-icon fas icon="eye"></mdb-icon> View Stock Details
+                                        (click)="addStockDetail(el)">
+                                        <mdb-icon fas icon="plus-circle"></mdb-icon> Add Stock Detail
                                     </button>
                                 </td>
                                 <td
@@ -108,38 +114,46 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header text-center">
-                <h4 class="modal-title w-100 font-weight-bold">Stock details of {{selectedCompany?.name}}</h4>
+                <h4 class="modal-title w-100 font-weight-bold">Stock Details</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                     (click)="stockDetails.hide()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body mx-3">
-                <div class="container-fluid" *ngIf="selectedCompany; else nodatafound">
+                <div class="container-fluid" *ngIf="companyList && companyList.length > 0; else nodatafound">
                     <div class="row">
                         <div class="col-sm-9">
                             <div class="d-flex justify-content-start">
-                                <p class="mr-2"><strong style="font-weight: bold;color: #00695c;">From: </strong><input
+                                <p class="mr-2">
+                                    <strong style="font-weight: bold;color: #00695c;">Company: </strong>
+                                    <select class="form-control" style="display: inline;height: 30px;" id="company" [formControl]="stockCmpSelect">
+                                        <option [value]="null" disabled>--Select--</option>
+                                        <option *ngFor="let company of companyList" [value]="company.id">
+                                            {{company.name}}</option>
+                                    </select>
+                                </p>
+                                <p><strong style="font-weight: bold;color: #00695c;">From: </strong><input
                                         [formControl]="fromDate" type="date"></p>
                                 <p><strong style="font-weight: bold;color: #00695c;">To: </strong><input
                                         [formControl]="toDate" type="date"></p>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <button style="float: right;" type="button" mdbBtn color="primary" size="sm" class="my-0"
-                            (click)="showAll()">
-                            <mdb-icon fas icon="undo"></mdb-icon> Show all
-                        </button>
+                            <button style="float: right;" type="button" mdbBtn color="primary" size="sm" class="my-4"
+                                (click)="showAll()">
+                                <mdb-icon fas icon="undo"></mdb-icon> Reset
+                            </button>
                         </div>
                     </div>
-                    <table id="listStockTable" mdbTable #stockTableEl="mdbTable" dbTableScroll scrollY="true"
-                        maxHeight="200" class="z-depth-1">
+                    <table id="listStockTable" mdbTable #stockTableEl="mdbTable" mdbTableScroll [scrollY]="scrollY"
+                        maxHeight="250" class="z-depth-1">
                         <thead>
                             <tr>
                                 <th class="font-weight-bold stylish-color" aria-controls="listStockTable"
                                     [mdbTableSort]="selectedCmpStkList" [sortBy]="'price'" scope="col"
                                     style="color: #ffffff;">
-                                    Stock Price <mdb-icon fas icon="sort"></mdb-icon>
+                                    Price <mdb-icon fas icon="sort"></mdb-icon>
                                 </th>
                                 <th class="font-weight-bold stylish-color" aria-controls="listStockTable"
                                     [mdbTableSort]="selectedCmpStkList" [sortBy]="'date'" scope="col"
@@ -156,7 +170,7 @@
                         <tbody>
                             <tr *ngFor="let el of selectedCmpStkList; let i = index">
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
-                                    {{el.price}}</td>
+                                    $ {{el.price}}</td>
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
                                     {{getFormattedDate(el.date)}}</td>
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
@@ -182,14 +196,14 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-4">
-                            <p><strong style="font-weight: bold;color: #00695c;">Min:</strong> {{stockMin?.price}}</p>
+                            <p><strong style="font-weight: bold;color: #00695c;">Min:</strong> $ {{stockMin?.price}}</p>
                         </div>
                         <div class="col-sm-4">
-                            <p><strong style="font-weight: bold;color: #00695c;">Max:</strong> {{stockMax?.price}}</p>
+                            <p><strong style="font-weight: bold;color: #00695c;">Max:</strong> $ {{stockMax?.price}}</p>
                         </div>
                         <div class="col-sm-4">
                             <p class="text-right"><strong style="font-weight: bold;color: #00695c;">Avg:</strong>
-                                {{stockAvg}}</p>
+                                $ {{stockAvg}}</p>
                         </div>
                     </div>
                 </div>
@@ -222,6 +236,10 @@
                                         *ngIf="(addCompanyFormControl.companyCode.touched || submitted) && addCompanyFormControl.companyCode.errors?.required">
                                         Company code is required
                                     </span>
+                                    <span class="text-danger"
+                                        *ngIf="(addCompanyFormControl.companyCode.touched || submitted) && addCompanyFormControl.companyCode.errors?.companyNotAvailable">
+                                        Company code is already exists
+                                    </span>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -251,7 +269,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="companyTurnover"><small class="requiredField">*</small>Company
-                                        Turnover</label>
+                                        Turnover </label>
                                     <input type="number" formControlName="companyTurnover" class="form-control"
                                         id="companyTurnover" placeholder="Company Turnover">
                                     <div class="text-danger"
@@ -259,9 +277,9 @@
                                         Company turnover is required
                                     </div>
                                     <div class="text-danger"
-                                        *ngIf="(addCompanyFormControl.companyTurnover.touched || submitted) && addCompanyFormControl.companyTurnover.errors?.gte">
+                                        *ngIf="(addCompanyFormControl.companyTurnover.dirty || submitted) && addCompanyFormControl.companyTurnover.errors?.gte">
                                         Company turnover should be greater than
-                                        {{addCompanyFormControl.companyTurnover.errors.requiredValue}}cr
+                                        {{addCompanyFormControl.companyTurnover.errors.requiredValue}} crore
                                     </div>
                                 </div>
                             </div>
@@ -307,6 +325,73 @@
                                         color="secondary" style="float:right;" class="waves-light"
                                         mdbWavesEffect>Reset</button>
                                     <button mdbBtn [disabled]="!addCompanyForm.valid" type="button" type="submit"
+                                        color="primary" style="float:right;" class="waves-light"
+                                        mdbWavesEffect>Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <!-- <div class="modal-footer d-flex justify-content-center">
+                <button mdbBtn color="default" data-dismiss="modal" aria-label="Close" (click)="addCompany.hide()"
+                    class="waves-light" mdbWavesEffect>Close</button>
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<div mdbModal #addStock="mdbModal" class="modal fade left" id="addStock" tabindex="-1" role="dialog"
+    aria-labelledby="addStockLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h4 class="modal-title w-100 font-weight-bold">Add Stock
+                    {{addStockFormControl.company != null ? 'to '+ addStockFormControl?.company?.value?.name : ''}}</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="addStock.hide()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body mx-3">
+                <form [formGroup]="addStockForm" novalidate autocomplete="off" class="well form-horizontal"
+                    (ngSubmit)="onStockSubmit()">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="stockPrice"><small class="requiredField">*</small>Price</label>
+                                    <input type="text" formControlName="price" class="form-control" id="stockPrice"
+                                        placeholder="Stock Price">
+                                    <div class="text-danger"
+                                        *ngIf="(addStockFormControl.price.touched || stockSubmitted) && addStockFormControl.price.errors?.required">
+                                        Stock price is required
+                                    </div>
+                                    <div class="text-danger"
+                                        *ngIf="(addStockFormControl.price.dirty || stockSubmitted) && addStockFormControl.price.errors?.notvalid">
+                                        Stock price should be fractional value
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="stockDate">Date: {{addStockFormControl?.date?.value}}</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="stockTime">Time: {{addStockFormControl?.time?.value}}</label>
+                                </div>
+                            </div> -->
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="requiredField">* <span>indicated fields are mandatory</span></small>
+                            </div>
+                            <div class="col-md-6">
+                                <div>
+                                    <button (click)="stockReset()" type="reset" mdbBtn type="button" color="secondary"
+                                        style="float:right;" class="waves-light" mdbWavesEffect>Reset</button>
+                                    <button mdbBtn [disabled]="!addStockForm.valid" type="button" type="submit"
                                         color="primary" style="float:right;" class="waves-light"
                                         mdbWavesEffect>Add</button>
                                 </div>

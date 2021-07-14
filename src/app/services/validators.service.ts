@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ValidatorFn, AbstractControl, ValidationErrors, AsyncValidatorFn } from '@angular/forms';
 import { FormGroup } from '@angular/forms';
+import { Observable, of } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -56,6 +57,23 @@ export class FormalidationService {
         return (UserList.indexOf(userName) > -1);
     }
 
+    validateCompanyCode(): AsyncValidatorFn {
+        return (control: AbstractControl): Observable<ValidationErrors | null> => {
+            if (!control.value) {
+                return of(null);
+            }
+
+            if (this.validateCompanyCodeService(control.value)) {
+                return of({ companyNotAvailable: true });
+            } return of(null);
+        };
+    }
+
+    validateCompanyCodeService(companyCode: string) {
+        const CompanyCodeList = ['CTS', 'TCS', 'WIPRO'];
+        return (CompanyCodeList.indexOf(companyCode) > -1);
+    }
+
     companyTurnoverValidator(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
             const v = +control.value;
@@ -66,6 +84,23 @@ export class FormalidationService {
 
             if (v <= 100000000) {
                 return { 'gte': true, 'requiredValue': 1 }
+            }
+
+            return null;
+        };
+    }
+
+    stockPriceValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            const v = +control.value;
+
+            if (isNaN(v)) {
+                return { 'notvalid': true }
+            }
+            
+            let r = new RegExp(/^-?[0-9]\d*(\.\d+)$/);
+            if (!r.test(v.toString())) {
+                return { 'notvalid': true }
             }
 
             return null;
