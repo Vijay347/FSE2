@@ -14,6 +14,7 @@ export interface Company {
 export interface Stock {
     id?: any;
     companyId?: any;
+    companyName?: any;
     price?: any;
     date?: any;
     time?: any;

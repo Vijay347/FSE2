@@ -34,12 +34,14 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   stockAvg: any;
   submitted: boolean = false;
   stockSubmitted: boolean = false;
+  showAdditionalDetails: boolean = false;
   scrollY: boolean = true;
   addCompanyForm: FormGroup;
   addStockForm: FormGroup;
   fromDate = new FormControl(null, Validators.required);
   toDate = new FormControl(null, Validators.required);
   stockCmpSelect = new FormControl(null, Validators.required);
+  selectedCompany: Company = null;
 
   constructor(private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
@@ -59,6 +61,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     let dummyStockDetails: Stock[] = [{
       id: 1,
       companyId: 1,
+      companyName: 'CTS',
       price: 12.0003,
       date: moment(),
       time: moment()
@@ -66,6 +69,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     {
       id: 2,
       companyId: 2,
+      companyName: 'TCS',
       price: 120.12345,
       date: moment().subtract(2, 'days'),
       time: moment().subtract(2, 'days')
@@ -73,6 +77,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     {
       id: 3,
       companyId: 3,
+      companyName: 'Wipro',
       price: 5000.19949,
       date: moment().subtract(20, 'days'),
       time: moment().subtract(20, 'days')
@@ -80,6 +85,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     {
       id: 4,
       companyId: 1,
+      companyName: 'CTS',
       price: 50000.003499,
       date: moment().subtract(100, 'days'),
       time: moment().subtract(100, 'days')
@@ -87,6 +93,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     {
       id: 5,
       companyId: 1,
+      companyName: 'CTS',
       price: 20000.003499,
       date: moment().subtract(120, 'days'),
       time: moment().subtract(120, 'days')
@@ -125,7 +132,9 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
         let company = this.companyList.find(x => x.id == companyId);
         if (company && company?.stockDetails
           && company?.stockDetails.length > 0) {
-          this.stockTableEl.setDataSource(company?.stockDetails);
+          this.showAdditionalDetails = true;
+          let stocks = _.orderBy(company?.stockDetails, ['date', 'time'], ['desc', 'desc']);
+          this.stockTableEl.setDataSource(stocks);
           this.selectedCmpStkList = this.stockTableEl.getDataSource();
           this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
           this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
@@ -149,26 +158,32 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
       if (val?.fromDate && val?.toDate) {
         let stocklist = this.stockCmpSelect.value ?
           this.companyList.find(x => x.id == this.stockCmpSelect.value)?.stockDetails ?? []
+          : this.selectedCompany ? this.selectedCompany?.stockDetails ?? [] 
           : _.flatMap(this.companyList.map(x => x.stockDetails), (val) => { return val });
         let filteredStocks = stocklist.filter(x => moment(x.date).isSameOrAfter(moment(val.fromDate), 'date') && moment(x.date).isSameOrBefore(moment(val.toDate), 'date'));
         if (filteredStocks && filteredStocks.length > 0) {
+          filteredStocks = _.orderBy(filteredStocks, ['date', 'time'], ['desc', 'desc']);
           this.stockTableEl.setDataSource(filteredStocks);
-          this.selectedCmpStkList = this.stockTableEl.getDataSource();
-          this.stockMin = 0;
-          this.stockMax = 0;
-          this.stockAvg = 0;
-          this.cdRef.detectChanges();
-        }
-        else {
-          this.stockTableEl.setDataSource([]);
           this.selectedCmpStkList = this.stockTableEl.getDataSource();
           this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
           this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
           this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
           this.cdRef.detectChanges();
         }
+        else {
+          this.stockTableEl.setDataSource([]);
+          this.selectedCmpStkList = this.stockTableEl.getDataSource();
+          this.stockMin = 0;
+          this.stockMax = 0;
+          this.stockAvg = 0;
+          this.cdRef.detectChanges();
+        }
       }
     });
+  }
+
+  getFormattedNaN(val: any) {
+    return isNaN(val) ? 0 : val;
   }
 
   getFormattedDate(val: any): any {
@@ -185,6 +200,10 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
 
   get addStockFormControl() {
     return this.addStockForm.controls;
+  }
+
+  getLatestStockPriceOfCompany(company: Company) {
+    return company?.stockDetails ? _.first(_.orderBy(company.stockDetails, ['date', 'time'], ['desc', 'desc']))?.price : 0;
   }
 
   addStockDetail(company: Company) {
@@ -229,8 +248,10 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     this.stockCmpSelect.reset(null, { emitEvent: true });
     this.fromDate.reset(null, { emitEvent: true });
     this.toDate.reset(null, { emitEvent: true });
+    this.showAdditionalDetails = false;
     let stocklist = this.companyList.map(x => x.stockDetails);
     let stocklistAll = _.flatMap(stocklist, (val) => { return val });
+    stocklistAll = _.orderBy(stocklistAll, ['companyName', 'date', 'time'], ['asc', 'desc', 'desc']);
     this.stockTableEl.setDataSource(stocklistAll);
     this.selectedCmpStkList = this.stockTableEl.getDataSource();
     this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
@@ -239,7 +260,24 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     this.cdRef.detectChanges();
   }
 
+  showCompanyAll() {
+    this.fromDate.reset(null, { emitEvent: true });
+    this.toDate.reset(null, { emitEvent: true });
+    this.showAdditionalDetails = true;
+    let stocklist = this.selectedCompany?.stockDetails;
+    let stocklistAll = _.flatMap(stocklist, (val) => { return val });
+    stocklistAll = _.orderBy(stocklistAll, ['companyName', 'date', 'time'], ['asc', 'desc', 'desc']);
+    this.stockTableEl.setDataSource(stocklistAll);
+    this.selectedCmpStkList = this.stockTableEl.getDataSource();
+    this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
+    this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
+    this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
+    this.cdRef.detectChanges();
+  }
+
+
   viewStockDetails() {
+    this.selectedCompany = null;
     this.viewStockDetModal.show();
     this.cdRef.detectChanges();
     let stocklist = this.companyList.map(x => x.stockDetails);
@@ -253,6 +291,25 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     this.stockTablePgn.calculateFirstItemIndex();
     this.stockTablePgn.calculateLastItemIndex();
     this.cdRef.detectChanges();
+  }
+
+  viewCompanyStockDetails(companyId: any) {
+    this.showAdditionalDetails = true;
+    this.viewStockDetModal.show();
+    this.cdRef.detectChanges();
+    this.selectedCompany = this.companyList.find(x => x.id == companyId);
+    if (this.selectedCompany.stockDetails && this.selectedCompany.stockDetails.length > 0) {
+      let stocklistAll = _.flatMap(this.selectedCompany.stockDetails, (val) => { return val });
+      this.stockTableEl.setDataSource(stocklistAll);
+      this.selectedCmpStkList = this.stockTableEl.getDataSource();
+      this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
+      this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
+      this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
+      this.stockTablePgn.setMaxVisibleItemsNumberTo(5);
+      this.stockTablePgn.calculateFirstItemIndex();
+      this.stockTablePgn.calculateLastItemIndex();
+      this.cdRef.detectChanges();
+    }
   }
 
   remove(id: any) {
