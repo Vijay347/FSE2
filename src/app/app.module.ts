@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -7,6 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { NgxSpinnerModule } from "ngx-spinner";
 import Amplify, { Auth } from 'aws-amplify';
 import { SigninComponent } from './components/auth/signin/signin.component';
 import { SignupComponent } from './components/auth/signup/signup.component';
@@ -37,8 +38,10 @@ Amplify.configure({
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    NgxSpinnerModule,
     MDBBootstrapModule.forRoot()
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [AuthActivateGuardService],
   bootstrap: [AppComponent]
 })

@@ -23,7 +23,6 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   @ViewChild('addCompany', { static: false, read: ModalDirective }) addCompanyModal: ModalDirective;
   @ViewChild('addStock', { static: false, read: ModalDirective }) addStockModal: ModalDirective;
 
-  editField: string;
   stockExchangeList: string[] = ['BSE', 'NSE'];
   companyList: Array<Company> = [];
   previous: Array<Company> = [];
@@ -319,10 +318,6 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   add() {
     this.addCompanyForm.reset();
     this.addCompanyModal.show();
-  }
-
-  changeValue(id: number, property: string, event: any) {
-    this.editField = event.target.textContent;
   }
 
   searchItems() {
