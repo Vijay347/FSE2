@@ -5,8 +5,9 @@ import * as _ from 'lodash';
 import { combineLatest, of } from 'rxjs';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Company, Stock } from 'src/app/models/company.model';
+import { Company, CompanyDetails, Stock } from 'src/app/models/company.model';
 import { FormalidationService } from 'src/app/services/validators.service';
+import { CompanyService } from 'src/app/services/company.service';
 
 @Component({
   selector: 'app-list-companies',
@@ -24,8 +25,8 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   @ViewChild('addStock', { static: false, read: ModalDirective }) addStockModal: ModalDirective;
 
   stockExchangeList: string[] = ['BSE', 'NSE'];
-  companyList: Array<Company> = [];
-  previous: Array<Company> = [];
+  companyList: Array<CompanyDetails> = [];
+  previous: Array<CompanyDetails> = [];
   searchText: string = '';
   selectedCmpStkList: Stock[] = [];
   stockMin: any;
@@ -40,11 +41,12 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   fromDate = new FormControl(null, Validators.required);
   toDate = new FormControl(null, Validators.required);
   stockCmpSelect = new FormControl(null, Validators.required);
-  selectedCompany: Company = null;
+  selectedCompany: CompanyDetails = null;
 
   constructor(private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
-    private formValidatorService: FormalidationService) {
+    private formValidatorService: FormalidationService,
+    private companyService: CompanyService) {
 
   }
   ngAfterViewInit(): void {
@@ -59,7 +61,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
 
     let dummyStockDetails: Stock[] = [{
       id: 1,
-      companyId: 1,
+      companyId: '8A92746B-77F3-413A-9B46-4F17B7BF7324',
       companyName: 'CTS',
       price: 12.0003,
       date: moment(),
@@ -83,7 +85,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     },
     {
       id: 4,
-      companyId: 1,
+      companyId: '8A92746B-77F3-413A-9B46-4F17B7BF7324',
       companyName: 'CTS',
       price: 50000.003499,
       date: moment().subtract(100, 'days'),
@@ -91,21 +93,25 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     },
     {
       id: 5,
-      companyId: 1,
+      companyId: '8A92746B-77F3-413A-9B46-4F17B7BF7324',
       companyName: 'CTS',
       price: 20000.003499,
       date: moment().subtract(120, 'days'),
       time: moment().subtract(120, 'days')
     }];
-    this.companyList = [
-      { id: 1, name: 'Cognizant', code: 'CTS', ceo: 'ceo1', turnover: '1000000001', website: 'http://www.cognizant.com', stockExchange: 'NSE', stockDetails: dummyStockDetails.filter(x => x.companyId == 1) },
-      { id: 2, name: 'TCS', code: 'TCS', ceo: 'ceo2', turnover: '1000000001', website: 'http://www.tcs.com', stockExchange: 'NSE', stockDetails: dummyStockDetails.filter(x => x.companyId == 2) },
-      { id: 3, name: 'Wipro', code: 'WIPRO', ceo: 'ceo3', turnover: '1000000001', website: 'http://www.wipro.com', stockExchange: 'BSE', stockDetails: dummyStockDetails.filter(x => x.companyId == 3) },
-    ];
 
-    this.mdbTable.setDataSource(this.companyList);
-    this.companyList = this.mdbTable.getDataSource();
-    this.previous = this.mdbTable.getDataSource();
+    this.companyService.getAllCompanies().subscribe((companies: CompanyDetails[]) => {
+      this.companyList = companies || [];
+      // dummy to be removed
+      this.companyList.forEach((x: CompanyDetails) => {
+        let stocks = dummyStockDetails.filter(y => y.companyId.toString().toLowerCase() == x.id);
+        x.stockDetails = stocks || [];
+      });
+
+      this.mdbTable.setDataSource(this.companyList);
+      this.companyList = this.mdbTable.getDataSource();
+      this.previous = this.mdbTable.getDataSource();
+    });
   }
 
   private createFormsAndEvents() {
@@ -157,8 +163,8 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
       if (val?.fromDate && val?.toDate) {
         let stocklist = this.stockCmpSelect.value ?
           this.companyList.find(x => x.id == this.stockCmpSelect.value)?.stockDetails ?? []
-          : this.selectedCompany ? this.selectedCompany?.stockDetails ?? [] 
-          : _.flatMap(this.companyList.map(x => x.stockDetails), (val) => { return val });
+          : this.selectedCompany ? this.selectedCompany?.stockDetails ?? []
+            : _.flatMap(this.companyList.map(x => x.stockDetails), (val) => { return val });
         let filteredStocks = stocklist.filter(x => moment(x.date).isSameOrAfter(moment(val.fromDate), 'date') && moment(x.date).isSameOrBefore(moment(val.toDate), 'date'));
         if (filteredStocks && filteredStocks.length > 0) {
           filteredStocks = _.orderBy(filteredStocks, ['date', 'time'], ['desc', 'desc']);
@@ -201,11 +207,11 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     return this.addStockForm.controls;
   }
 
-  getLatestStockPriceOfCompany(company: Company) {
-    return company?.stockDetails ? _.first(_.orderBy(company.stockDetails, ['date', 'time'], ['desc', 'desc']))?.price : 0;
+  getLatestStockPriceOfCompany(company: CompanyDetails) {
+    return company?.stockDetails?.length > 0 ? _.first(_.orderBy(company.stockDetails, ['date', 'time'], ['desc', 'desc']))?.price : 0;
   }
 
-  addStockDetail(company: Company) {
+  addStockDetail(company: CompanyDetails) {
     this.addStockModal.show();
     this.addStockForm.reset();
     this.addStockForm.get('company').patchValue(company);
@@ -231,9 +237,26 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
 
   onSubmit() {
     this.submitted = true;
+
     if (this.addCompanyForm.valid) {
-      console.table(this.addCompanyForm.value);
+      const compDet: CompanyDetails = {
+        name: this.addCompanyForm.value.companyName,
+        code: this.addCompanyForm.value.companyCode,
+        ceo: this.addCompanyForm.value.companyCEO,
+        turnover: parseFloat(this.addCompanyForm.value.companyTurnover),
+        website: this.addCompanyForm.value.companyWebsite,
+        stockExchange: this.addCompanyForm.value.companyStockExchange
+      };
+      this.companyService.addCompany(compDet).subscribe((res: CompanyDetails) => {
+        if (res) {
+          this.companyList.push(res);
+        }
+        this.addCompanyForm.reset();
+        this.addCompanyModal.hide();
+        this.cdRef.detectChanges();
+      });
     }
+    return;
   }
 
   onStockSubmit() {
@@ -312,7 +335,11 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   }
 
   remove(id: any) {
-    this.companyList.splice(id, 1);
+    this.companyService.deleteCompany(id).subscribe((res: any) => {
+      if (res) {
+        this.companyList.splice(id, 1);
+      }
+    });
   }
 
   add() {

@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgxSpinnerModule } from "ngx-spinner";
 import Amplify, { Auth } from 'aws-amplify';
 import { SigninComponent } from './components/auth/signin/signin.component';
@@ -16,6 +16,9 @@ import { UnAuthorizedComponent } from './components/un-authorized/un-authorized.
 import { environment } from 'src/environments/environment';
 import { AuthActivateGuardService } from './guards/auth-activate-guard.service';
 import { ListCompaniesComponent } from './components/list-companies/list-companies.component';
+import { CompanyService } from './services/company.service';
+import { JwtInterceptor } from './interceptors/jwt.interceptor';
+import { LoaderInterceptor } from './interceptors/loader-interceptor';
 
 Amplify.configure({
   Auth: environment.awsCognitoSettings
@@ -42,7 +45,10 @@ Amplify.configure({
     MDBBootstrapModule.forRoot()
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  providers: [AuthActivateGuardService],
+  providers: [AuthActivateGuardService, CompanyService,
+    { provide: 'gatewayAPIRoot', useValue: environment.gatewayAPIRoot },
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

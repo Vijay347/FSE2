@@ -77,7 +77,7 @@
                                     $ {{el.turnover}}</td>
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
-                                    <a href="{{el.website}}" target="_blank">{{el.website}}</a>
+                                    <a href="javascript:void(0)">{{el.website}}</a>
                                 </td>
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
@@ -90,6 +90,7 @@
                                         (click)="viewCompanyStockDetails(el.id)" mdbBtn color="primary" size="sm" class="my-0">
                                         <mdb-icon fas icon="eye"></mdb-icon> View Stock Details
                                     </button>
+                                    <p *ngIf="el?.stockDetails.length <= 0">No stocks available</p>
                                 </td>
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">

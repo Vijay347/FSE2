@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Auth } from 'aws-amplify';
 import { Router } from '@angular/router';
-import { SignIn, SignUp } from '../models/user.model';
+import { CognitoUser, SignIn, SignUp } from '../models/user.model';
+import { from } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+
+  private refreshTokenTimeout;
 
   constructor(private router: Router) {
 
@@ -17,6 +20,7 @@ export class AuthService {
       let user = await Auth.signIn(userDet.email, userDet.password);
       let tokens = user.signInUserSession;
       if (tokens != null) {
+        this.startRefreshTokenTimer();
         return true;
       }
       return false;
@@ -48,10 +52,38 @@ export class AuthService {
   async signOut(): Promise<boolean> {
     try {
       await Auth.signOut();
+      this.stopRefreshTokenTimer();
       return true;
     } catch (error) {
       console.log('error signing out: ', error);
       return false;
     }
+  }
+
+  async refreshToken() {
+    try {
+      const cognitoUser = await Auth.currentAuthenticatedUser();
+      const { refreshToken } = cognitoUser.getSignInUserSession();
+      cognitoUser.refreshSession(refreshToken, (err, session) => {
+        const { idToken, refreshToken, accessToken } = session;
+      });
+    } catch (e) {
+      console.log('Unable to refresh Token', e);
+    }
+  }
+
+  public startRefreshTokenTimer() {
+    Auth.currentAuthenticatedUser().then((x: CognitoUser) => {
+      if (x) {
+        const jwtToken = JSON.parse(atob(x.signInUserSession.accessToken.jwtToken.split('.')[1]));
+        const expires = new Date(jwtToken.exp * 1000);
+        const timeout = expires.getTime() - Date.now() - (60 * 1000);
+        this.refreshTokenTimeout = setTimeout(() => from(this.refreshToken()).subscribe(), timeout);
+      }
+    });
+  }
+
+  private stopRefreshTokenTimer() {
+    clearTimeout(this.refreshTokenTimeout);
   }
 }

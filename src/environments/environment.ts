@@ -10,7 +10,8 @@ export const environment = {
     userPoolId: 'us-east-2_ClDUuWRcR',
     userPoolWebClientId: 'rlbbg9f94vodaj73dpekde4pt',
     authenticationFlowType: 'USER_PASSWORD_AUTH'
-  }
+  },
+  gatewayAPIRoot: 'http://localhost:5000'
 };
 
 /*
