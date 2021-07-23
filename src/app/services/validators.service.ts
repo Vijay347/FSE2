@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ValidatorFn, AbstractControl, ValidationErrors, AsyncValidatorFn } from '@angular/forms';
 import { FormGroup } from '@angular/forms';
-import { Observable, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
+import { CompanyService } from './company.service';
 
 @Injectable({
     providedIn: 'root'
 })
-export class FormalidationService {
+export class FormvalidationService {
+
+    constructor(private companyService: CompanyService) { }
 
     patternValidator(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: any } => {
@@ -58,31 +62,35 @@ export class FormalidationService {
     }
 
     validateCompanyCode(): AsyncValidatorFn {
-        return (control: AbstractControl): Observable<ValidationErrors | null> => {
-            if (!control.value) {
+        return (control: AbstractControl): Observable<ValidationErrors> | Promise<ValidationErrors> | null => {
+            if (!control.value)
                 return of(null);
-            }
-
-            if (this.validateCompanyCodeService(control.value)) {
-                return of({ companyNotAvailable: true });
-            } return of(null);
-        };
+            else {
+                return control.valueChanges.pipe(
+                    debounceTime(500),
+                    take(1),
+                    switchMap(_ =>
+                        this.companyService.getCompany(control.value).pipe(
+                            map(res => {
+                                return res ? { companyNotAvailable: true } : null;
+                            }))
+                    )
+                );
+            };
+        }
     }
 
-    validateCompanyCodeService(companyCode: string) {
-        const CompanyCodeList = ['CTS', 'TCS', 'WIPRO'];
-        return (CompanyCodeList.indexOf(companyCode) > -1);
+    validateCompanyCodeService(companyCodes: string[], companyCode: string) {
+        return (companyCodes.indexOf(companyCode) > -1);
     }
 
     companyTurnoverValidator(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
+            let pat = `/^[0-9]\d{1,${Number.MAX_SAFE_INTEGER}}$/`;
+            let r = new RegExp(pat);
             const v = +control.value;
 
-            if (isNaN(v)) {
-                return { 'gte': true, 'requiredValue': 1 }
-            }
-
-            if (v <= 100000000) {
+            if (isNaN(v) || !r.test(v.toString()) || v <= 100000000) {
                 return { 'gte': true, 'requiredValue': 1 }
             }
 
@@ -94,16 +102,12 @@ export class FormalidationService {
         return (control: AbstractControl): ValidationErrors | null => {
             const v = +control.value;
 
-            if (isNaN(v)) {
-                return { 'notvalid': true }
-            }
-            
             let r = new RegExp(/^-?[0-9]\d*(\.\d+)$/);
-            if (!r.test(v.toString())) {
+            if (isNaN(v) || !r.test(v.toString())) {
                 return { 'notvalid': true }
             }
 
             return null;
         };
     }
-} 
+}

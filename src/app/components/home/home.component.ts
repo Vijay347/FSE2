@@ -6,7 +6,7 @@ import { combineLatest, of } from 'rxjs';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Company, Stock } from 'src/app/models/company.model';
-import { FormalidationService } from 'src/app/services/validators.service';
+import { FormvalidationService } from 'src/app/services/validators.service';
 
 @Component({
   selector: 'app-home',
@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   constructor(private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
-    private formValidatorService: FormalidationService) {
+    private formValidatorService: FormvalidationService) {
 
   }
   ngAfterViewInit(): void {

@@ -1,9 +1,8 @@
 export const Constants = {
     CompanyGatewayEndpoints: {
-        getAllCompaniesEndpoint: 'gateway/v1/company/getallcompanies',
-        getCompanyEndpoint: 'gateway/v1/company/getcompany',
-        updateCompanyEndpoint: 'gateway/v1/company/updatecompany',
-        addCompanyEndpoint: 'gateway/v1/company/addcompany',
-        deleteCompanyEndpoint: 'gateway/v1/company/deletecompany'
+        getAllCompaniesEndpoint: 'api/v1/market/company/getall',
+        getCompanyEndpoint: 'api/v1/market/company/info',
+        addCompanyEndpoint: 'api/v1/market/company/register',
+        deleteCompanyEndpoint: 'api/v1/market/company/delete'
     }
 }

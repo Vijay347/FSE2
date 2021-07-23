@@ -85,9 +85,11 @@
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
                                     $ {{(getLatestStockPriceOfCompany(el))}}</td>
-                                <td *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
+                                <td
+                                    *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
                                     <button *ngIf="el?.stockDetails.length > 0" type="button"
-                                        (click)="viewCompanyStockDetails(el.id)" mdbBtn color="primary" size="sm" class="my-0">
+                                        (click)="viewCompanyStockDetails(el.id)" mdbBtn color="primary" size="sm"
+                                        class="my-0">
                                         <mdb-icon fas icon="eye"></mdb-icon> View Stock Details
                                     </button>
                                     <p *ngIf="el?.stockDetails.length <= 0">No stocks available</p>
@@ -129,7 +131,8 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header text-center">
-                <h4 class="modal-title w-100 font-weight-bold">{{selectedCompany != null ? 'Stock Details of '+selectedCompany?.name : 'Stock Details'}}</h4>
+                <h4 class="modal-title w-100 font-weight-bold">{{selectedCompany != null ? 'Stock Details of
+                    '+selectedCompany?.name : 'Stock Details'}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                     (click)="stockDetails.hide()">
                     <span aria-hidden="true">&times;</span>
@@ -156,12 +159,12 @@
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <button *ngIf="selectedCompany == null" style="float: right;" type="button" mdbBtn color="primary" size="sm" class="my-4"
-                                (click)="showAll()">
+                            <button *ngIf="selectedCompany == null" style="float: right;" type="button" mdbBtn
+                                color="primary" size="sm" class="my-4" (click)="showAll()">
                                 <mdb-icon fas icon="undo"></mdb-icon> Reset
                             </button>
-                            <button *ngIf="selectedCompany != null" style="float: right;" type="button" mdbBtn color="primary" size="sm"
-                                (click)="showCompanyAll()">
+                            <button *ngIf="selectedCompany != null" style="float: right;" type="button" mdbBtn
+                                color="primary" size="sm" (click)="showCompanyAll()">
                                 <mdb-icon fas icon="undo"></mdb-icon> Reset
                             </button>
                         </div>
@@ -256,8 +259,13 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="companyCode"><small class="requiredField">*</small>Code</label>
-                                    <input type="text" formControlName="companyCode" class="form-control"
-                                        id="companyCode" placeholder="Company Code">
+                                    <div class="inputcontainer">
+                                        <input type="text" formControlName="companyCode" class="form-control"
+                                            id="companyCode" placeholder="Company Code">
+                                        <div *ngIf="addCompanyFormControl.companyCode.pending" class="icon-container">
+                                            <i class="loader"></i>
+                                        </div>
+                                    </div>
                                     <span class="text-danger"
                                         *ngIf="(addCompanyFormControl.companyCode.touched || submitted) && addCompanyFormControl.companyCode.errors?.required">
                                         Company code is required
@@ -296,8 +304,8 @@
                                 <div class="form-group">
                                     <label for="companyTurnover"><small class="requiredField">*</small>Company
                                         Turnover </label>
-                                    <input type="number" formControlName="companyTurnover" class="form-control"
-                                        id="companyTurnover" placeholder="Company Turnover">
+                                    <input type="text" maxlength="19" formControlName="companyTurnover"
+                                        class="form-control" id="companyTurnover" placeholder="Company Turnover">
                                     <div class="text-danger"
                                         *ngIf="(addCompanyFormControl.companyTurnover.touched || submitted) && addCompanyFormControl.companyTurnover.errors?.required">
                                         Company turnover is required

@@ -15,8 +15,8 @@ export class CompanyService {
     return this.http.get<CompanyDetails[]>(url).pipe(map(this.extractResult), catchError(this.handleError));
   }
 
-  public getCompany(id: any): Observable<CompanyDetails> {
-    let url = `${this.GATEWAY_API_ROOT}/${Constants.CompanyGatewayEndpoints.getCompanyEndpoint}/${id}`;
+  public getCompany(code: any): Observable<CompanyDetails> {
+    let url = `${this.GATEWAY_API_ROOT}/${Constants.CompanyGatewayEndpoints.getCompanyEndpoint}/${code}`;
     return this.http.get<CompanyDetails>(url).pipe(map(this.extractResult), catchError(this.handleError));
   }
 
@@ -25,13 +25,8 @@ export class CompanyService {
     return this.http.post<CompanyDetails>(url, JSON.stringify(company)).pipe(map(this.extractResult), catchError(this.handleError));
   }
 
-  public updateCompany(id: any, company: CompanyDetails): Observable<any> {
-    let url = `${this.GATEWAY_API_ROOT}/${Constants.CompanyGatewayEndpoints.updateCompanyEndpoint}/${id}`;
-    return this.http.put<any>(url, JSON.stringify(company)).pipe(map(this.extractResult), catchError(this.handleError));
-  }
-
-  public deleteCompany(id: any): Observable<CompanyDetails> {
-    let url = `${this.GATEWAY_API_ROOT}/${Constants.CompanyGatewayEndpoints.deleteCompanyEndpoint}/${id}`;
+  public deleteCompany(code: any): Observable<CompanyDetails> {
+    let url = `${this.GATEWAY_API_ROOT}/${Constants.CompanyGatewayEndpoints.deleteCompanyEndpoint}/${code}`;
     return this.http.delete<CompanyDetails>(url).pipe(map(this.extractResult), catchError(this.handleError));
   }
 

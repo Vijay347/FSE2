@@ -5,8 +5,8 @@ import * as _ from 'lodash';
 import { combineLatest, of } from 'rxjs';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Company, CompanyDetails, Stock } from 'src/app/models/company.model';
-import { FormalidationService } from 'src/app/services/validators.service';
+import { CompanyDetails, Stock } from 'src/app/models/company.model';
+import { FormvalidationService } from 'src/app/services/validators.service';
 import { CompanyService } from 'src/app/services/company.service';
 
 @Component({
@@ -45,7 +45,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
 
   constructor(private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
-    private formValidatorService: FormalidationService,
+    private formValidatorService: FormvalidationService,
     private companyService: CompanyService) {
 
   }
@@ -107,6 +107,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
         let stocks = dummyStockDetails.filter(y => y.companyId.toString().toLowerCase() == x.id);
         x.stockDetails = stocks || [];
       });
+      //this.companyCodes = this.companyList.length > 0 ? _.map(this.companyList, (o) => { return o.code }) : [];
 
       this.mdbTable.setDataSource(this.companyList);
       this.companyList = this.mdbTable.getDataSource();
@@ -117,12 +118,12 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   private createFormsAndEvents() {
 
     this.addCompanyForm = this.fb.group({
-      companyCode: new FormControl(null, { validators: [Validators.required], asyncValidators: [this.formValidatorService.validateCompanyCode()] }),
-      companyName: new FormControl(null, Validators.required),
-      companyCEO: new FormControl(null, Validators.required),
+      companyCode: new FormControl(null, { validators: Validators.compose([Validators.required, Validators.maxLength(20)]), asyncValidators: [this.formValidatorService.validateCompanyCode()], updateOn: 'blur' }),
+      companyName: new FormControl(null, { validators: Validators.compose([Validators.required, Validators.maxLength(100)]) }),
+      companyCEO: new FormControl(null, { validators: Validators.compose([Validators.required, Validators.maxLength(100)]) }),
       companyTurnover: new FormControl(null, { validators: Validators.compose([Validators.required, this.formValidatorService.companyTurnoverValidator()]) }),
-      companyWebsite: new FormControl(null, Validators.required),
-      companyStockExchange: new FormControl(null, Validators.required)
+      companyWebsite: new FormControl(null, { validators: Validators.compose([Validators.required, Validators.maxLength(100)]) }),
+      companyStockExchange: new FormControl(null, { validators: Validators.compose([Validators.required, Validators.maxLength(50)]) })
     });
 
     this.addStockForm = this.fb.group({
