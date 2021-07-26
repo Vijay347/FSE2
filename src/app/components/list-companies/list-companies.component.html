@@ -52,9 +52,9 @@
                                     [mdbTableSort]="companyList" [sortBy]="'stockExchange'" scope="col"
                                     style="color: #ffffff;">Stock Exchange <mdb-icon fas icon="sort"></mdb-icon>
                                 </th>
-                                <th class="font-weight-bold stylish-color" aria-controls="listTable" scope="col"
+                                <!-- <th class="font-weight-bold stylish-color" aria-controls="listTable" scope="col"
                                     style="color: #ffffff;">Current Stock Price
-                                </th>
+                                </th> -->
                                 <th class="font-weight-bold stylish-color" style="color: #ffffff;">View</th>
                                 <th class="font-weight-bold stylish-color" style="color: #ffffff;">Add</th>
                                 <!-- <th class="font-weight-bold stylish-color" style="color: #ffffff;">View</th> -->
@@ -82,17 +82,16 @@
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
                                     {{el.stockExchange}}</td>
+                                <!-- <td
+                                    *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
+                                    $ {{(getLatestStockPriceOfCompany(el))}}</td> -->
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
-                                    $ {{(getLatestStockPriceOfCompany(el))}}</td>
-                                <td
-                                    *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
-                                    <button *ngIf="el?.stockDetails.length > 0" type="button"
-                                        (click)="viewCompanyStockDetails(el.id)" mdbBtn color="primary" size="sm"
+                                    <button type="button"
+                                        (click)="viewCompanyStockDetails(el)" mdbBtn color="primary" size="sm"
                                         class="my-0">
                                         <mdb-icon fas icon="eye"></mdb-icon> View Stock Details
                                     </button>
-                                    <p *ngIf="el?.stockDetails.length <= 0">No stocks available</p>
                                 </td>
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
@@ -104,7 +103,7 @@
                                 <td
                                     *ngIf="i+1 >= mdbTablePagination.firstItemIndex && i < mdbTablePagination.lastItemIndex">
                                     <button type="button" mdbBtn color="danger" size="sm" class="my-0"
-                                        (click)="remove(el.id)">
+                                        (click)="remove(el)">
                                         <mdb-icon fas icon="trash"></mdb-icon> Delete Company
                                     </button>
                                 </td>
@@ -148,7 +147,7 @@
                                     <select class="form-control" style="display: inline;height: 30px;" id="company"
                                         [formControl]="stockCmpSelect">
                                         <option [value]="null" disabled>--Select--</option>
-                                        <option *ngFor="let company of companyList" [value]="company.id">
+                                        <option *ngFor="let company of companyList" [value]="company.code">
                                             {{company.name}}</option>
                                     </select>
                                 </p>
@@ -169,7 +168,7 @@
                             </button>
                         </div>
                     </div>
-                    <table id="listStockTable" mdbTable #stockTableEl="mdbTable" mdbTableScroll [scrollY]="scrollY"
+                    <table id="listStockTable" *ngIf="selectedCmpStkList" mdbTable #stockTableEl="mdbTable" mdbTableScroll [scrollY]="scrollY"
                         maxHeight="250" class="z-depth-1">
                         <thead>
                             <tr>
@@ -198,13 +197,13 @@
                         <tbody>
                             <tr *ngFor="let el of selectedCmpStkList; let i = index">
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
-                                    {{el.companyName}}</td>
+                                    {{getcompanyName(el.companyCode)}}</td>
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
                                     $ {{el.price}}</td>
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
                                     {{getFormattedDate(el.date)}}</td>
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
-                                    {{getFormattedTime(el.time)}}</td>
+                                    {{el.time}}</td>
                             </tr>
                         </tbody>
                         <tfoot class="grey lighten-5 w-100">

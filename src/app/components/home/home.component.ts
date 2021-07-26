@@ -5,8 +5,9 @@ import * as _ from 'lodash';
 import { combineLatest, of } from 'rxjs';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Company, Stock } from 'src/app/models/company.model';
+import { CompanyDetails, Stock, StockAddVM } from 'src/app/models/company.model';
 import { FormvalidationService } from 'src/app/services/validators.service';
+import { CompanyService } from 'src/app/services/company.service';
 
 @Component({
   selector: 'app-home',
@@ -22,8 +23,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   @ViewChild('addStock', { static: false, read: ModalDirective }) addStockModal: ModalDirective;
 
   stockExchangeList: string[] = ['BSE', 'NSE'];
-  companyList: Array<Company> = [];
-  previous: Array<Company> = [];
+  companyList: Array<CompanyDetails> = [];
+  stockDetails: Stock[] = [];
+  previous: Array<CompanyDetails> = [];
   searchText = new FormControl(null, Validators.required);
   selectedCmpStkList: Stock[] = [];
   stockMin: any;
@@ -34,11 +36,12 @@ export class HomeComponent implements OnInit, AfterViewInit {
   addStockForm: FormGroup;
   fromDate = new FormControl(null, Validators.required);
   toDate = new FormControl(null, Validators.required);
-  selectedCompany: Company[] = [];
+  selectedCompany: CompanyDetails[] = [];
 
   constructor(private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
-    private formValidatorService: FormvalidationService) {
+    private formValidatorService: FormvalidationService,
+    private companyService: CompanyService) {
 
   }
   ngAfterViewInit(): void {
@@ -49,51 +52,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.createFormsAndEvents();
 
-    let dummyStockDetails: Stock[] = [{
-      id: 1,
-      companyId: 1,
-      companyName: 'CTS',
-      price: 12.0003,
-      date: moment(),
-      time: moment()
-    },
-    {
-      id: 2,
-      companyId: 2,
-      companyName: 'TCS',
-      price: 120.12345,
-      date: moment().subtract(2, 'days'),
-      time: moment().subtract(2, 'days')
-    },
-    {
-      id: 3,
-      companyId: 3,
-      companyName: 'Wipro',
-      price: 5000.19949,
-      date: moment().subtract(20, 'days'),
-      time: moment().subtract(20, 'days')
-    },
-    {
-      id: 4,
-      companyId: 1,
-      companyName: 'CTS',
-      price: 50000.003499,
-      date: moment().subtract(100, 'days'),
-      time: moment().subtract(100, 'days')
-    },
-    {
-      id: 5,
-      companyId: 1,
-      companyName: 'CTS',
-      price: 20000.003499,
-      date: moment().subtract(120, 'days'),
-      time: moment().subtract(120, 'days')
-    }];
-    this.companyList = [
-      { id: 1, name: 'Cognizant', code: 'CTS', ceo: 'ceo1', turnover: '1000000001', website: 'http://www.cognizant.com', stockExchange: 'NSE', stockDetails: dummyStockDetails.filter(x => x.companyId == 1) },
-      { id: 2, name: 'TCS', code: 'TCS', ceo: 'ceo2', turnover: '1000000001', website: 'http://www.tcs.com', stockExchange: 'NSE', stockDetails: dummyStockDetails.filter(x => x.companyId == 2) },
-      { id: 3, name: 'Wipro', code: 'WIPRO', ceo: 'ceo3', turnover: '1000000001', website: 'http://www.wipro.com', stockExchange: 'BSE', stockDetails: dummyStockDetails.filter(x => x.companyId == 3) },
-    ];
+    this.companyService.getAllCompanies().subscribe((res: CompanyDetails[]) => {
+      this.companyList = res || [];
+    });
   }
 
   private createFormsAndEvents() {
@@ -108,30 +69,45 @@ export class HomeComponent implements OnInit, AfterViewInit {
     let filter$ = combineLatest([this.fromDate.valueChanges, this.toDate.valueChanges])
       .pipe(debounceTime(500), switchMap(([from, to]) => { return of({ fromDate: from, toDate: to }) }));
 
-    filter$.subscribe((val: any) => {
-      if (val?.fromDate && val?.toDate) {
-        let stocklist = this.selectedCompany ? this.selectedCompany[0]?.stockDetails ?? []
-          : _.flatMap(this.companyList.map(x => x.stockDetails), (val) => { return val });
-        let filteredStocks = _.filter(stocklist, (x: Stock) => { return moment(x.date).isSameOrAfter(moment(val.fromDate), 'date') && moment(x.date).isSameOrBefore(moment(val.toDate), 'date') });
-        if (filteredStocks && filteredStocks.length > 0) {
-          filteredStocks = _.orderBy(filteredStocks, ['date', 'time'], ['desc', 'desc']);
-          this.stockTableEl.setDataSource(filteredStocks);
-          this.selectedCmpStkList = this.stockTableEl.getDataSource();
-          this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
-          this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
-          this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
-          this.cdRef.detectChanges();
+      filter$.subscribe((val: any) => {
+        if (val?.fromDate && val?.toDate) {
+          let stocklist: Stock[] = [];
+          if (this.selectedCompany) {
+            let code = this.selectedCompany[0].code;
+            this.companyService.getCompanyStocksByCode(code).subscribe((stks: Stock[]) => {
+              stocklist = stks || [];
+              this.filterStocks(stocklist, val.fromDate, val.toDate);
+            });
+          }
+          else {
+            this.companyService.getAllCompanyStocks().subscribe((stks: Stock[]) => {
+              stocklist = stks || [];
+              this.filterStocks(stocklist, val.fromDate, val.toDate);
+            });
+          }
         }
-        else {
-          this.stockTableEl.setDataSource([]);
-          this.selectedCmpStkList = this.stockTableEl.getDataSource();
-          this.stockMin = 0;
-          this.stockMax = 0;
-          this.stockAvg = 0;
-          this.cdRef.detectChanges();
-        }
-      }
-    });
+      });
+  }
+
+  private filterStocks(stocklist: Stock[], fromDate: any, toDate: any) {
+    let filteredStocks = stocklist.filter(x => moment(x.date).isSameOrAfter(moment(fromDate), 'date') && moment(x.date).isSameOrBefore(moment(toDate), 'date'));
+    if (filteredStocks && filteredStocks.length > 0) {
+      filteredStocks = _.orderBy(filteredStocks, ['date', 'time'], ['desc', 'desc']);
+      this.stockTableEl.setDataSource(filteredStocks);
+      this.selectedCmpStkList = this.stockTableEl.getDataSource();
+      this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
+      this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
+      this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
+      this.cdRef.detectChanges();
+    }
+    else {
+      this.stockTableEl.setDataSource([]);
+      this.selectedCmpStkList = this.stockTableEl.getDataSource();
+      this.stockMin = 0;
+      this.stockMax = 0;
+      this.stockAvg = 0;
+      this.cdRef.detectChanges();
+    }
   }
 
   searchCompany() {
@@ -151,27 +127,27 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   getFormattedDate(val: any): any {
-    return val.format('MMMM Do YYYY');
+    return moment(val).format('MMMM Do YYYY');
   }
 
   getFormattedTime(val: any): any {
-    return val.format('h:mm:ss:SSS a');
+    return moment(val).format('h:mm:ss:SSS a');
   }
 
   get addStockFormControl() {
     return this.addStockForm.controls;
   }
 
-  getLatestStockPriceOfCompany(company: Company) {
-    return company?.stockDetails ? _.first(_.orderBy(company.stockDetails, ['date', 'time'], ['desc', 'desc']))?.price : 0;
-  }
+  // getLatestStockPriceOfCompany(company: Company) {
+  //   return company?.stockDetails ? _.first(_.orderBy(company.stockDetails, ['date', 'time'], ['desc', 'desc']))?.price : 0;
+  // }
 
-  addStockDetail(company: Company) {
+  addStockDetail(company: CompanyDetails) {
     this.addStockModal.show();
     this.addStockForm.reset();
     this.addStockForm.get('company').patchValue(company);
     this.addStockForm.get('company').updateValueAndValidity();
-    this.addStockForm.get('date').patchValue(moment().format('YYYY-MM-DD'));
+    this.addStockForm.get('date').patchValue(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }));
     this.addStockForm.get('date').updateValueAndValidity();
     this.addStockForm.get('time').patchValue(moment().format('h:mm:ss:SSS a'))
     this.addStockForm.get('time').updateValueAndValidity();
@@ -182,7 +158,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   stockReset() {
     this.addStockForm.get('price').reset(null);
     this.addStockForm.get('price').updateValueAndValidity();
-    this.addStockForm.get('date').reset(moment().format('YYYY-MM-DD'));
+    this.addStockForm.get('date').reset(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }));
     this.addStockForm.get('date').updateValueAndValidity();
     this.addStockForm.get('time').reset(moment().format('h:mm:ss:SSS a'))
     this.addStockForm.get('time').updateValueAndValidity();
@@ -192,43 +168,66 @@ export class HomeComponent implements OnInit, AfterViewInit {
   onStockSubmit() {
     this.stockSubmitted = true;
     if (this.addStockForm.valid) {
-      console.table(this.addStockForm.value);
+      const ip: StockAddVM = {
+        companyCode: this.addStockForm.get('company').value?.code,
+        price: parseFloat(this.addStockForm.get('price').value),
+        date: this.addStockForm.get('date').value,
+        time: this.addStockForm.get('time').value
+      };
+      this.companyService.addCompanyStock(ip).subscribe((stock: Stock) => {
+        if (stock)
+          this.selectedCmpStkList.push(stock);
+      });
     }
   }
 
   showCompanyAll() {
     this.fromDate.reset(null, { emitEvent: true });
     this.toDate.reset(null, { emitEvent: true });
-    let stocklist = this.selectedCompany[0]?.stockDetails;
-    let stocklistAll = _.flatMap(stocklist, (val) => { return val });
-    stocklistAll = _.orderBy(stocklistAll, ['companyName', 'date', 'time'], ['asc', 'desc', 'desc']);
-    this.stockTableEl.setDataSource(stocklistAll);
-    this.selectedCmpStkList = this.stockTableEl.getDataSource();
-    this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
-    this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
-    this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
-    this.cdRef.detectChanges();
-  }
-
-  viewCompanyStockDetails(companyId: any) {
-    this.viewStockDetModal.show();
-    this.cdRef.detectChanges();
-    this.selectedCompany = this.companyList.filter(x => x.id == companyId);
-    if (this.selectedCompany[0].stockDetails && this.selectedCompany[0].stockDetails.length > 0) {
-      let stocklistAll = _.flatMap(this.selectedCompany[0].stockDetails, (val) => { return val });
+    this.companyService.getCompanyStocksByCode(this.selectedCompany[0].code).subscribe((stks: Stock[]) => {
+      let stocklistAll = _.orderBy(stks, ['companyName', 'date', 'time'], ['asc', 'desc', 'desc']);
       this.stockTableEl.setDataSource(stocklistAll);
       this.selectedCmpStkList = this.stockTableEl.getDataSource();
       this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
       this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
       this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
-      this.stockTablePgn.setMaxVisibleItemsNumberTo(5);
-      this.stockTablePgn.calculateFirstItemIndex();
-      this.stockTablePgn.calculateLastItemIndex();
       this.cdRef.detectChanges();
+    });
+  }
+
+
+  viewCompanyStockDetails(company: CompanyDetails) {
+    this.viewStockDetModal.show();
+    this.cdRef.detectChanges();
+    let cmp = this.companyList.find(x => x.id == company.id);
+    this.selectedCompany = cmp != null ? [cmp] : [];
+    if (this.selectedCompany) {
+      this.companyService.getCompanyStocksByCode(this.selectedCompany[0].code).subscribe((stocks: Stock[]) => {
+        this.stockTableEl.setDataSource(stocks || []);
+        this.selectedCmpStkList = this.stockTableEl.getDataSource();
+        this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
+        this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
+        this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
+        this.stockTablePgn.setMaxVisibleItemsNumberTo(5);
+        this.stockTablePgn.calculateFirstItemIndex();
+        this.stockTablePgn.calculateLastItemIndex();
+        this.cdRef.detectChanges();
+      });
     }
   }
 
-  remove(id: any) {
-    this.companyList.splice(id, 1);
+  
+  remove(company: CompanyDetails) {
+    this.companyService.deleteCompanyStocks(company.code).subscribe((result: string) => {
+      if (result) {
+        this.companyService.deleteCompany(company.id).subscribe((res: any) => {
+          if (res) {
+            let idx = this.companyList.findIndex(c => c.id == company.id);
+            if (idx > -1)
+              this.companyList.splice(idx, 1);
+          }
+        });
+      }
+    });
   }
 }

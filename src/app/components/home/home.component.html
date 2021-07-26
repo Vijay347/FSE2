@@ -42,9 +42,9 @@
                 <th class="font-weight-bold stylish-color" aria-controls="listTable" scope="col"
                   style="color: #ffffff;">Stock Exchange
                 </th>
-                <th class="font-weight-bold stylish-color" aria-controls="listTable" scope="col"
+                <!-- <th class="font-weight-bold stylish-color" aria-controls="listTable" scope="col"
                   style="color: #ffffff;">Current Stock Price
-                </th>
+                </th> -->
                 <th class="font-weight-bold stylish-color" style="color: #ffffff;">View</th>
                 <th class="font-weight-bold stylish-color" style="color: #ffffff;">Add</th>
                 <!-- <th class="font-weight-bold stylish-color" style="color: #ffffff;">View</th> -->
@@ -66,10 +66,10 @@
                 </td>
                 <td>
                   {{el.stockExchange}}</td>
+                <!-- <td>
+                  $ {{(getLatestStockPriceOfCompany(el))}}</td> -->
                 <td>
-                  $ {{(getLatestStockPriceOfCompany(el))}}</td>
-                <td>
-                  <button *ngIf="el?.stockDetails.length > 0" type="button" (click)="viewCompanyStockDetails(el.id)"
+                  <button type="button" (click)="viewCompanyStockDetails(el)"
                     mdbBtn color="primary" size="sm" class="my-0">
                     <mdb-icon fas icon="eye"></mdb-icon> View Stock Details
                   </button>
@@ -80,7 +80,7 @@
                   </button>
                 </td>
                 <td>
-                  <button type="button" mdbBtn color="danger" size="sm" class="my-0" (click)="remove(el.id)">
+                  <button type="button" mdbBtn color="danger" size="sm" class="my-0" (click)="remove(el)">
                     <mdb-icon fas icon="trash"></mdb-icon> Delete Company
                   </button>
                 </td>
@@ -146,7 +146,7 @@
                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
                   {{getFormattedDate(el.date)}}</td>
                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
-                  {{getFormattedTime(el.time)}}</td>
+                  {{el.time}}</td>
               </tr>
             </tbody>
             <tfoot class="grey lighten-5 w-100">
