@@ -8,6 +8,9 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { CompanyDetails, Stock, StockAddVM } from 'src/app/models/company.model';
 import { FormvalidationService } from 'src/app/services/validators.service';
 import { CompanyService } from 'src/app/services/company.service';
+import { ToastService } from 'src/app/services/toast.service';
+import { IConfirmBoxPublicResponse } from '@costlydeveloper/ngx-awesome-popup';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -39,9 +42,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
   selectedCompany: CompanyDetails[] = [];
 
   constructor(private cdRef: ChangeDetectorRef,
+    private router: Router,
     private fb: FormBuilder,
     private formValidatorService: FormvalidationService,
-    private companyService: CompanyService) {
+    private companyService: CompanyService, private toastService: ToastService) {
 
   }
   ngAfterViewInit(): void {
@@ -69,24 +73,24 @@ export class HomeComponent implements OnInit, AfterViewInit {
     let filter$ = combineLatest([this.fromDate.valueChanges, this.toDate.valueChanges])
       .pipe(debounceTime(500), switchMap(([from, to]) => { return of({ fromDate: from, toDate: to }) }));
 
-      filter$.subscribe((val: any) => {
-        if (val?.fromDate && val?.toDate) {
-          let stocklist: Stock[] = [];
-          if (this.selectedCompany) {
-            let code = this.selectedCompany[0].code;
-            this.companyService.getCompanyStocksByCode(code).subscribe((stks: Stock[]) => {
-              stocklist = stks || [];
-              this.filterStocks(stocklist, val.fromDate, val.toDate);
-            });
-          }
-          else {
-            this.companyService.getAllCompanyStocks().subscribe((stks: Stock[]) => {
-              stocklist = stks || [];
-              this.filterStocks(stocklist, val.fromDate, val.toDate);
-            });
-          }
+    filter$.subscribe((val: any) => {
+      if (val?.fromDate && val?.toDate) {
+        let stocklist: Stock[] = [];
+        if (this.selectedCompany) {
+          let code = this.selectedCompany[0].code;
+          this.companyService.getCompanyStocksByCode(code).subscribe((stks: Stock[]) => {
+            stocklist = stks || [];
+            this.filterStocks(stocklist, val.fromDate, val.toDate);
+          });
         }
-      });
+        else {
+          this.companyService.getAllCompanyStocks().subscribe((stks: Stock[]) => {
+            stocklist = stks || [];
+            this.filterStocks(stocklist, val.fromDate, val.toDate);
+          });
+        }
+      }
+    });
   }
 
   private filterStocks(stocklist: Stock[], fromDate: any, toDate: any) {
@@ -175,8 +179,12 @@ export class HomeComponent implements OnInit, AfterViewInit {
         time: this.addStockForm.get('time').value
       };
       this.companyService.addCompanyStock(ip).subscribe((stock: Stock) => {
-        if (stock)
-          this.selectedCmpStkList.push(stock);
+        if (stock) {
+          this.toastService.toastNotification('Stock', `Stock added to ${this.addStockForm.get('company').value?.name} successfully!`);
+          this.addStockForm.reset();
+          this.addStockModal.hide();
+          this.reloadCurrentRoute();
+        }
       });
     }
   }
@@ -198,6 +206,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   viewCompanyStockDetails(company: CompanyDetails) {
     this.viewStockDetModal.show();
+    this.resetStockGrid();
     this.cdRef.detectChanges();
     let cmp = this.companyList.find(x => x.id == company.id);
     this.selectedCompany = cmp != null ? [cmp] : [];
@@ -216,18 +225,35 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }
   }
 
-  
+  private resetStockGrid() {
+    this.stockTableEl.setDataSource([]);
+    this.selectedCmpStkList = this.stockTableEl.getDataSource();
+    this.stockMin = 0;
+    this.stockMax = 0;
+    this.stockAvg = 0;
+  }
   remove(company: CompanyDetails) {
-    this.companyService.deleteCompanyStocks(company.code).subscribe((result: string) => {
-      if (result) {
-        this.companyService.deleteCompany(company.id).subscribe((res: any) => {
-          if (res) {
-            let idx = this.companyList.findIndex(c => c.id == company.id);
-            if (idx > -1)
-              this.companyList.splice(idx, 1);
+    this.toastService.openConfirmPopup('Are you sure?', `That action will delete ${company.name} and its stock details!`).subscribe((resp: IConfirmBoxPublicResponse) => {
+      if (resp.ClickedButtonID == 'yes') {
+        this.companyService.deleteCompanyStocks(company.code).subscribe((result: string) => {
+          if (result) {
+            this.companyService.deleteCompany(company.code).subscribe((res: any) => {
+              if (res) {
+                this.toastService.toastNotification('Success', `${company.name} details deleted successfully!`);
+                this.reloadCurrentRoute();
+              }
+            });
           }
         });
       }
     });
   }
+
+  private reloadCurrentRoute() {
+    let currentUrl = this.router.url;
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([currentUrl]);
+    });
+  }
+
 }

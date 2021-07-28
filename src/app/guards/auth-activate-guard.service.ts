@@ -14,8 +14,11 @@ export class AuthActivateGuardService implements CanActivate {
         state: RouterStateSnapshot): boolean | Promise<boolean> | Observable<boolean> {
 
         return Auth.currentAuthenticatedUser().then((x: any) => {
+            return true;
+        }).catch(err => {
+            this._router.navigateByUrl('un-authorized');
             return false;
-        }).catch(err => { return true; });
+        });
     }
 
 }

@@ -2,12 +2,15 @@ import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '
 import { MdbTableDirective, MdbTablePaginationComponent, ModalDirective } from 'angular-bootstrap-md';
 import * as moment from 'moment';
 import * as _ from 'lodash';
-import { combineLatest, from, iif, of } from 'rxjs';
-import { concatMap, debounceTime, retry, switchMap } from 'rxjs/operators';
+import { combineLatest, of } from 'rxjs';
+import { debounceTime, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CompanyDetails, Stock, StockAddVM } from 'src/app/models/company.model';
 import { FormvalidationService } from 'src/app/services/validators.service';
 import { CompanyService } from 'src/app/services/company.service';
+import { ToastService } from 'src/app/services/toast.service';
+import { IConfirmBoxPublicResponse } from '@costlydeveloper/ngx-awesome-popup';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-list-companies',
@@ -45,9 +48,10 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   selectedCompany: CompanyDetails = null;
 
   constructor(private cdRef: ChangeDetectorRef,
+    private router: Router,
     private fb: FormBuilder,
     private formValidatorService: FormvalidationService,
-    private companyService: CompanyService) {
+    private companyService: CompanyService, private toastService: ToastService) {
 
   }
   ngAfterViewInit(): void {
@@ -204,7 +208,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   stockReset() {
     this.addStockForm.get('price').reset(null);
     this.addStockForm.get('price').updateValueAndValidity();
-    this.addStockForm.get('date').reset(moment().utc().set({hour:0,minute:0,second:0,millisecond:0}).toDate());
+    this.addStockForm.get('date').reset(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toDate());
     this.addStockForm.get('date').updateValueAndValidity();
     this.addStockForm.get('time').reset(moment().format('h:mm:ss:SSS a'))
     this.addStockForm.get('time').updateValueAndValidity();
@@ -226,11 +230,12 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
       };
       this.companyService.addCompany(compDet).subscribe((res: CompanyDetails) => {
         if (res) {
-          this.companyList.push(res);
+          this.toastService.toastNotification('Company', `${compDet.name} added successfully!`);
         }
         this.addCompanyForm.reset();
         this.addCompanyModal.hide();
         this.cdRef.detectChanges();
+        this.reloadCurrentRoute();
       });
     }
     return;
@@ -246,10 +251,22 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
         time: this.addStockForm.get('time').value
       };
       this.companyService.addCompanyStock(ip).subscribe((stock: Stock) => {
-        if (stock)
-          this.selectedCmpStkList.push(stock);
+        if (stock) {
+          this.toastService.toastNotification('Stock', `Stock added to ${this.addStockForm.get('company').value?.name} successfully!`);
+        }
+        this.addStockForm.reset();
+        this.addStockModal.hide();
+        this.cdRef.detectChanges();
+        this.reloadCurrentRoute();
       });
     }
+  }
+
+  private reloadCurrentRoute() {
+    let currentUrl = this.router.url;
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([currentUrl]);
+    });
   }
 
   showAll() {
@@ -307,6 +324,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   viewCompanyStockDetails(company: CompanyDetails) {
     this.showAdditionalDetails = true;
     this.viewStockDetModal.show();
+    this.resetStockGrid();
     this.cdRef.detectChanges();
     this.selectedCompany = this.companyList.find(x => x.id == company.id);
     if (this.selectedCompany) {
@@ -325,13 +343,16 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   }
 
   remove(company: CompanyDetails) {
-    this.companyService.deleteCompanyStocks(company.code).subscribe((result: string) => {
-      if (result) {
-        this.companyService.deleteCompany(company.id).subscribe((res: any) => {
-          if (res) {
-            let idx = this.companyList.findIndex(c => c.id == company.id);
-            if (idx > -1)
-              this.companyList.splice(idx, 1);
+    this.toastService.openConfirmPopup('Are you sure?', `That action will delete ${company.name} and its stock details!`).subscribe((resp: IConfirmBoxPublicResponse) => {
+      if (resp.ClickedButtonID == 'yes') {
+        this.companyService.deleteCompanyStocks(company.code).subscribe((result: string) => {
+          if (result) {
+            this.companyService.deleteCompany(company.code).subscribe((res: any) => {
+              if (res) {
+                this.toastService.toastNotification('Success', `${company.name} details deleted successfully!`);
+                this.reloadCurrentRoute();
+              }
+            });
           }
         });
       }

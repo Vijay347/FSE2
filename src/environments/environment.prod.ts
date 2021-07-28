@@ -7,5 +7,6 @@ export const environment = {
     userPoolWebClientId: 'rlbbg9f94vodaj73dpekde4pt',
     authenticationFlowType: 'USER_PASSWORD_AUTH'
   },
-  gatewayAPIRoot: 'http://localhost:5000'
+  // gatewayAPIRoot: 'http://localhost:5000',
+  gatewayAPIRoot: 'http://gateway.api:80'
 };

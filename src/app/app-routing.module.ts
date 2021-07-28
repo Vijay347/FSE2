@@ -8,20 +8,19 @@ import { UnAuthorizedComponent } from './components/un-authorized/un-authorized.
 import { AuthActivateGuardService } from './guards/auth-activate-guard.service';
 
 const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'signin' },
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
   {
     path: 'home',
-    component: HomeComponent
+    component: HomeComponent,
+    canActivate: [AuthActivateGuardService]
   },
   {
     path: 'signin',
-    component: SigninComponent,
-    canActivate: [AuthActivateGuardService]
+    component: SigninComponent
   },
   {
     path: 'signup',
-    component: SignupComponent,
-    canActivate: [AuthActivateGuardService]
+    component: SignupComponent
   },
   {
     path: 'list-companies',

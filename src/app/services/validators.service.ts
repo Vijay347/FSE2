@@ -72,7 +72,7 @@ export class FormvalidationService {
                     switchMap(_ =>
                         this.companyService.getCompany(control.value).pipe(
                             map(res => {
-                                return res ? { companyNotAvailable: true } : null;
+                                return res && Object.keys(res).length > 0 ? { companyNotAvailable: true } : null;
                             }))
                     )
                 );
@@ -86,8 +86,7 @@ export class FormvalidationService {
 
     companyTurnoverValidator(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
-            let pat = `/^[0-9]\d{1,${Number.MAX_SAFE_INTEGER}}$/`;
-            let r = new RegExp(pat);
+            let r = new RegExp(/^\d+$/);
             const v = +control.value;
 
             if (isNaN(v) || !r.test(v.toString()) || v <= 100000000) {

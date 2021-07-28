@@ -9,6 +9,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgxSpinnerModule } from "ngx-spinner";
 import Amplify, { Auth } from 'aws-amplify';
+import {
+  ConfirmBoxConfigModule,
+  NgxAwesomePopupModule,
+  ToastNotificationConfigModule
+} from '@costlydeveloper/ngx-awesome-popup';
 import { SigninComponent } from './components/auth/signin/signin.component';
 import { SignupComponent } from './components/auth/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
@@ -42,7 +47,14 @@ Amplify.configure({
     ReactiveFormsModule,
     HttpClientModule,
     NgxSpinnerModule,
-    MDBBootstrapModule.forRoot()
+    MDBBootstrapModule.forRoot(),
+    NgxAwesomePopupModule.forRoot(),
+    ToastNotificationConfigModule.forRoot({
+      GlobalSettings: {
+        AllowedNotificationsAtOnce: 5
+      }
+    }),
+    ConfirmBoxConfigModule.forRoot()
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [AuthActivateGuardService, CompanyService,

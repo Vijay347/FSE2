@@ -270,7 +270,7 @@
                                         Company code is required
                                     </span>
                                     <span class="text-danger"
-                                        *ngIf="(addCompanyFormControl.companyCode.touched || submitted) && addCompanyFormControl.companyCode.errors?.companyNotAvailable">
+                                        *ngIf="(addCompanyFormControl.companyCode.touched || submitted) && !addCompanyFormControl.companyCode.pending && addCompanyFormControl.companyCode.errors?.companyNotAvailable">
                                         Company code is already exists
                                     </span>
                                 </div>
