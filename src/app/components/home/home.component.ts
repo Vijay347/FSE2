@@ -34,6 +34,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   stockMin: any;
   stockMax: any;
   stockAvg: any;
+  latestStockPrice: any;
   stockSubmitted: boolean = false;
   scrollY: boolean = true;
   addStockForm: FormGroup;
@@ -217,6 +218,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
         this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
         this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
+        this.latestStockPrice = stocks ? _.first(_.orderBy(stocks, ['date', 'time'], ['desc', 'desc'])) : 0;
         this.stockTablePgn.setMaxVisibleItemsNumberTo(5);
         this.stockTablePgn.calculateFirstItemIndex();
         this.stockTablePgn.calculateLastItemIndex();
@@ -231,6 +233,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.stockMin = 0;
     this.stockMax = 0;
     this.stockAvg = 0;
+    this.latestStockPrice = 0;
   }
   remove(company: CompanyDetails) {
     this.toastService.openConfirmPopup('Are you sure?', `That action will delete ${company.name} and its stock details!`).subscribe((resp: IConfirmBoxPublicResponse) => {

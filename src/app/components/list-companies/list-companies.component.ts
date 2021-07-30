@@ -36,6 +36,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   stockMin: any;
   stockMax: any;
   stockAvg: any;
+  latestStockPrice: any;
   submitted: boolean = false;
   stockSubmitted: boolean = false;
   showAdditionalDetails: boolean = false;
@@ -103,6 +104,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
             this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
             this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
             this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
+            this.latestStockPrice = stocks ? _.first(_.orderBy(stocks, ['date', 'time'], ['desc', 'desc'])) : 0;
           });
         }
         else {
@@ -111,6 +113,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
           this.stockMin = 0;
           this.stockMax = 0;
           this.stockAvg = 0;
+          this.latestStockPrice = 0;
           this.cdRef.detectChanges();
         }
       }
@@ -145,6 +148,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     this.stockMin = 0;
     this.stockMax = 0;
     this.stockAvg = 0;
+    this.latestStockPrice = 0;
   }
 
   private filterStocks(stocklist: Stock[], fromDate: any, toDate: any) {
@@ -156,6 +160,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
       this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
       this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
       this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
+      this.latestStockPrice = filteredStocks ? _.first(_.orderBy(filteredStocks, ['date', 'time'], ['desc', 'desc'])) : 0;
       this.cdRef.detectChanges();
     }
     else {
@@ -164,6 +169,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
       this.stockMin = 0;
       this.stockMax = 0;
       this.stockAvg = 0;
+      this.latestStockPrice = 0
       this.cdRef.detectChanges();
     }
   }
@@ -334,6 +340,7 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
         this.stockMin = _.minBy(this.selectedCmpStkList, (o) => { return o.price });
         this.stockMax = _.maxBy(this.selectedCmpStkList, (o) => { return o.price });
         this.stockAvg = _.meanBy(this.selectedCmpStkList, (o) => { return o.price });
+        this.latestStockPrice = stocks ? _.first(_.orderBy(stocks, ['date', 'time'], ['desc', 'desc'])) : 0;
         this.stockTablePgn.setMaxVisibleItemsNumberTo(5);
         this.stockTablePgn.calculateFirstItemIndex();
         this.stockTablePgn.calculateLastItemIndex();
