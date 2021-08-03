@@ -23,7 +23,7 @@ COPY ./.docker/nginx.conf /etc/nginx/nginx.conf
 RUN rm -rf /usr/share/nginx/html/*
 # Copy static assets from builder stage
 COPY --from=builder /app-ui/dist/estockmarketui /usr/share/nginx/html
-# Expose in 9191 port
+# Expose in 80 port
 EXPOSE 80
 # Containers run nginx with global directives and daemon off
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

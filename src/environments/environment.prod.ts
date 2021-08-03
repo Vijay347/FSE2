@@ -8,5 +8,5 @@ export const environment = {
     authenticationFlowType: 'USER_PASSWORD_AUTH'
   },
   // gatewayAPIRoot: 'http://localhost:5000',
-  gatewayAPIRoot: 'http://gateway.api:80'
+  gatewayAPIRoot: 'http://localhost:8001'
 };
