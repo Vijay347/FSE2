@@ -45,7 +45,6 @@
             <mdb-icon fas icon="user-circle"></mdb-icon> Profile<span class="caret"></span>
           </a>
           <div *dropdownMenu class="dropdown-menu dropdown-menu-right dropdown dropdown-primary" role="menu">
-            <a class="dropdown-item waves-light" mdbWavesEffect href="#">My account</a>
             <a class="dropdown-item waves-light" (click)="signout($event)" mdbWavesEffect href="javascript:void(0)">Log
               out</a>
           </div>
@@ -64,3 +63,21 @@
   [fullScreen]="true">
   <p style="color: white"> Loading... </p>
 </ngx-spinner>
+
+<div mdbModal #sessionExpiryModal="mdbModal" [config]="{backdrop: 'static', keyboard: false}" class="modal fade right" tabindex="-1" role="dialog" aria-labelledby="myBasicModalLabel"
+   aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title w-100" id="myModalLabel">Session Expiry</h4>
+            </div>
+            <div class="modal-body">
+              Your session is about to expire in {{expireSeconds}} seconds, do you want to continue or sign out?
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" mdbBtn color="secondary" class="waves-light" aria-label="Close" (click)="signout($event)" mdbWavesEffect>Sign out</button>
+                <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="continue($event)" mdbWavesEffect>Continue</button>
+            </div>
+        </div>
+    </div>
+</div>

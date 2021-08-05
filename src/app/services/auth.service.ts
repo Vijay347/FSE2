@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { Auth } from 'aws-amplify';
 import { Router } from '@angular/router';
 import { CognitoUser, SignIn, SignUp } from '../models/user.model';
-import { from } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,8 @@ import { from } from 'rxjs';
 export class AuthService {
 
   private refreshTokenTimeout;
-
+  private sessionExpiryAlertSub: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public sessionExpiryAlertSubOb = this.sessionExpiryAlertSub.asObservable().pipe(distinctUntilChanged());
   constructor(private router: Router) {
 
   }
@@ -78,9 +80,14 @@ export class AuthService {
         const jwtToken = JSON.parse(atob(x.signInUserSession.accessToken.jwtToken.split('.')[1]));
         const expires = new Date(jwtToken.exp * 1000);
         const timeout = expires.getTime() - Date.now() - (60 * 1000);
-        this.refreshTokenTimeout = setTimeout(() => from(this.refreshToken()).subscribe(), timeout);
+        this.refreshTokenTimeout = setTimeout(() => {
+          this.sessionExpiryAlertSubVal(true);
+        }, timeout);
       }
     });
+  }
+  public sessionExpiryAlertSubVal(val: boolean) {
+    this.sessionExpiryAlertSub.next(val);
   }
 
   private stopRefreshTokenTimer() {
