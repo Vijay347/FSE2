@@ -202,7 +202,7 @@
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
                                     {{getFormattedDate(el.date)}}</td>
                                 <td *ngIf="i+1 >= stockTablePgn.firstItemIndex && i < stockTablePgn.lastItemIndex">
-                                    {{el.time}}</td>
+                                    {{getFormattedTime(el.time)}}</td>
                             </tr>
                         </tbody>
                         <tfoot class="grey lighten-5 w-100">

@@ -24,7 +24,7 @@ export interface StockAddVM {
     companyCode?: string,
     price?: number,
     date?: Date,
-    time?: string
+    time?: Date
 }
 
 export interface StockGetVM {
