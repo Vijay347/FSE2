@@ -3,12 +3,12 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
+  production: false, 
   awsCognitoSettings: {
     mandatorySignIn: true,
     region: 'us-east-2',
-    userPoolId: 'us-east-2_ClDUuWRcR',
-    userPoolWebClientId: 'rlbbg9f94vodaj73dpekde4pt',
+    userPoolId: 'us-east-2_T4FLhGVFS',
+    userPoolWebClientId: '1ut7enauc30drc33t2b56d94b9',
     authenticationFlowType: 'USER_PASSWORD_AUTH'
   },
   gatewayAPIRoot: 'http://localhost:5000'

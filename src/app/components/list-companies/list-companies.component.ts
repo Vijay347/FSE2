@@ -203,8 +203,8 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
     this.addStockForm.reset();
     this.addStockForm.get('company').patchValue(company);
     this.addStockForm.get('company').updateValueAndValidity();
-    //this.addStockForm.get('date').patchValue(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }));
-    this.addStockForm.get('date').patchValue(moment().toDate());
+    this.addStockForm.get('date').patchValue(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }));
+    //this.addStockForm.get('date').patchValue(moment().toDate());
     this.addStockForm.get('date').updateValueAndValidity();
     //this.addStockForm.get('time').patchValue(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }));
     this.addStockForm.get('time').patchValue(moment().toDate());
@@ -216,8 +216,8 @@ export class ListCompaniesComponent implements OnInit, AfterViewInit {
   stockReset() {
     this.addStockForm.get('price').reset(null);
     this.addStockForm.get('price').updateValueAndValidity();
-    //this.addStockForm.get('date').reset(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toDate());
-    this.addStockForm.get('date').reset(moment().toDate());
+    this.addStockForm.get('date').reset(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toDate());
+    //this.addStockForm.get('date').reset(moment().toDate());
     this.addStockForm.get('date').updateValueAndValidity();
     //this.addStockForm.get('time').reset(moment().utc().set({ hour: 0, minute: 0, second: 0, millisecond: 0 }));
     this.addStockForm.get('time').reset(moment().toDate());
