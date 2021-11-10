@@ -6,9 +6,9 @@ export const environment = {
   production: false, 
   awsCognitoSettings: {
     mandatorySignIn: true,
-    region: 'us-east-2',
-    userPoolId: 'us-east-2_T4FLhGVFS',
-    userPoolWebClientId: '1ut7enauc30drc33t2b56d94b9',
+    region: 'us-east-1',
+    userPoolId: 'us-east-1_u3t4ChEoU',
+    userPoolWebClientId: '1robhrct7t6nb3pa6u97ovv62l',
     authenticationFlowType: 'USER_PASSWORD_AUTH'
   },
   gatewayAPIRoot: 'http://localhost:5000'

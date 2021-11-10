@@ -16,7 +16,7 @@ export class AuthActivateGuardService implements CanActivate {
         return Auth.currentAuthenticatedUser().then((x: any) => {
             return true;
         }).catch(err => {
-            this._router.navigateByUrl('un-authorized');
+            this._router.navigateByUrl('signin');
             return false;
         });
     }
